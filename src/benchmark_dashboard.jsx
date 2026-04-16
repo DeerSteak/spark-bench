@@ -1,10 +1,13 @@
-import React, { useState, useCallback, useMemo, useRef, useEffect } from "react";
+import React, { useState, useCallback, useMemo, useRef } from "react";
+import html2canvas from "html2canvas";
 import { DEPTH_ORDER } from "./constants";
 import { parseCSV, parseFilename } from "./utils";
 import Header from "./components/Header";
 import Controls from "./components/Controls";
 import ChartPanel from "./components/ChartPanel";
 import StatsTable from "./components/StatsTable";
+import "./dashboard.css";
+import styles from "./benchmark_dashboard.module.css";
 
 export default function Dashboard() {
   const [files, setFiles] = useState([]);
@@ -75,18 +78,11 @@ export default function Dashboard() {
   const chartRef = useRef(null);
   const [saving, setSaving] = useState(false);
 
-  useEffect(() => {
-    if (window.html2canvas) return;
-    const script = document.createElement("script");
-    script.src = "https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js";
-    document.head.appendChild(script);
-  }, []);
-
   const saveChart = useCallback(async () => {
     if (!chartRef.current || saving) return;
     setSaving(true);
     try {
-      const canvas = await window.html2canvas(chartRef.current, {
+      const canvas = await html2canvas(chartRef.current, {
         backgroundColor: "#ffffff", scale: 2, useCORS: true, logging: false,
       });
       const link = document.createElement("a");
@@ -109,19 +105,7 @@ export default function Dashboard() {
   const filteredData = useMemo(() => allData.filter(d => enabledDepths.has(d.depth)), [allData, enabledDepths]);
 
   return (
-    <div style={{ background: "#ffffff", minHeight: "100vh", color: "#1a1f24", fontFamily: "'IBM Plex Mono', monospace", padding: "24px 28px" }}>
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;600;700&display=swap');
-        * { box-sizing: border-box; }
-        ::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-track { background: #f6f8fa; } ::-webkit-scrollbar-thumb { background: #d0d7de; border-radius: 3px; }
-        .pill { display: inline-flex; align-items: center; padding: 4px 12px; border-radius: 20px; font-size: 11px; cursor: pointer; border: 1px solid transparent; transition: all .15s; font-family: 'IBM Plex Mono', monospace; }
-        .pill:hover { opacity: .85; }
-        .pill.active { border-color: #0969da; background: #dff0ff; color: #0969da; }
-        .pill.inactive { border-color: #d0d7de; background: #f6f8fa; color: #57606a; }
-        .card { background: #f6f8fa; border: 1px solid #d0d7de; border-radius: 10px; padding: 20px 24px; }
-        .tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-family: 'IBM Plex Mono'; }
-      `}</style>
-
+    <div className={styles.root}>
       <Header
         files={files}
         dragOver={dragOver}
@@ -162,7 +146,7 @@ export default function Dashboard() {
         onCycleSort={cycleSort}
       />
 
-      <div style={{ marginTop: 16, fontSize: 14, color: "#8c959f", textAlign: "right" }}>
+      <div className={styles.ttftLegend}>
         TTFT color: <span style={{ color: "#3fb950" }}>●</span> &lt;5s &nbsp;
         <span style={{ color: "#d29922" }}>●</span> 5–30s &nbsp;
         <span style={{ color: "#f85149" }}>●</span> &gt;30s
