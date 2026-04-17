@@ -1,0 +1,65 @@
+.wrapper {
+  margin-top: 20px;
+  overflow-x: auto;
+}
+
+.tableTitle {
+  font-size: 19px;
+  font-weight: 600;
+  color: #1a1f24;
+  font-family: 'IBM Plex Sans';
+  margin-bottom: 14px;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 17px;
+}
+
+.table thead tr {
+  border-bottom: 1px solid #d0d7de;
+}
+
+.th {
+  padding: 6px 12px;
+  text-align: right;
+  font-weight: 400;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  font-size: 14px;
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+  color: #57606a;
+}
+
+.th.sorted {
+  color: #0969da;
+}
+
+.sortArrow {
+  opacity: 0.35;
+}
+
+.th.sorted .sortArrow {
+  opacity: 1;
+}
+
+.table tbody tr {
+  border-bottom: 1px solid #eaeef2;
+}
+
+.table tbody tr:nth-child(even) {
+  background: #f0f2f5aa;
+}
+
+.td {
+  padding: 6px 12px;
+  text-align: right;
+}
+
+.tdDepth { color: #79c0ff; }
+.tdTps   { color: #1a1f24; }
+.tdTpsReq { color: #57606a; }
+/* TTFT and concurrency colors are data-driven — set inline */
