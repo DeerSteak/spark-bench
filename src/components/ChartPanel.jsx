@@ -6,19 +6,18 @@ import CustomTooltip from "./CustomTooltip";
 import styles from "./ChartPanel.module.css";
 
 function FileSubtitle({ files }) {
-  if (files.length === 1) {
-    return (
-      <div className={styles.subtitleSingle}>
-        <span className={styles.subtitleModel}>{files[0].model}</span>
-        {files[0].tpLabel && (
-          <span className={files[0].tp === 1 ? styles.subtitleTp1 : styles.subtitleTp2plus}>
-            · {files[0].tpLabel}
-          </span>
-        )}
-      </div>
-    );
-  }
-  return <div className={styles.subtitleMulti}>by context depth · lines = concurrency</div>;
+  const f = files[0];
+  if (!f) return null;
+  return (
+    <div className={styles.subtitleSingle}>
+      <span className={styles.subtitleModel}>{f.model}</span>
+      {f.tpLabel && (
+        <span className={f.tp === 1 ? styles.subtitleTp1 : styles.subtitleTp2plus}>
+          · {f.tpLabel}
+        </span>
+      )}
+    </div>
+  );
 }
 
 function ChartCard({ title, subtitle, data, activeLines, yTickFormatter, yLabel, unit }) {
@@ -49,6 +48,14 @@ function ChartCard({ title, subtitle, data, activeLines, yTickFormatter, yLabel,
 export default function ChartPanel({ containerRef, selectedOp, filteredData, files, tpsLabel, tpsMetric, chartWidth, logoSrc }) {
   const isTTFT = selectedOp === "ttft_pp" || selectedOp === "ttft_ctx";
   const containerStyle = { width: chartWidth, minWidth: chartWidth, maxWidth: chartWidth };
+
+  if (files.length === 0) {
+    return (
+      <div className={styles.emptyState} style={containerStyle}>
+        Drop a CSV file above to get started
+      </div>
+    );
+  }
 
   if (isTTFT) {
     const ttftOp = selectedOp === "ttft_pp" ? "pp2048" : "ctx_pp";
