@@ -1,24 +1,21 @@
 import styles from "./Header.module.css";
 
 export default function Header({ files, dragOver, onDrop, onDragOver, onDragLeave, onRemoveFile }) {
+  const file = files[0] ?? null;
   return (
     <header className={styles.header}>
       <div>
         <div className={styles.brand}>Sparkrun · Benchmark Explorer</div>
         <h1 className={styles.title}>Inference Performance</h1>
-        {files.length > 1 && (
-          <div className={styles.fileTagList}>
-            {files.map(f => (
-              <div key={f.id} className={styles.fileTagRow}>
-                <span className={`tag ${styles.tagModel}`}>{f.model}</span>
-                {f.tp && (
-                  <span className={`tag ${f.tp === 1 ? styles.tagTp1 : styles.tagTp2plus}`}>
-                    {f.tpLabel}
-                  </span>
-                )}
-                {f.suite && <span className={`tag ${styles.tagSuite}`}>{f.suite}</span>}
-              </div>
-            ))}
+        {file && (
+          <div className={styles.fileTagRow}>
+            <span className={`tag ${styles.tagModel}`}>{file.model}</span>
+            {file.tp && (
+              <span className={`tag ${file.tp === 1 ? styles.tagTp1 : styles.tagTp2plus}`}>
+                {file.tpLabel}
+              </span>
+            )}
+            {file.suite && <span className={`tag ${styles.tagSuite}`}>{file.suite}</span>}
           </div>
         )}
       </div>
@@ -31,22 +28,16 @@ export default function Header({ files, dragOver, onDrop, onDragOver, onDragLeav
           className={`${styles.dropZone} ${dragOver ? styles.over : ""}`}
         >
           <div className={styles.dropZoneText}>
-            {dragOver ? "Drop to add CSV" : "↓ Drop additional CSVs here"}
+            {dragOver ? "Drop to load CSV" : file ? "↓ Drop CSV to replace" : "↓ Drop CSV here"}
           </div>
         </div>
-        <div className={styles.fileList}>
-          {files.map(f => (
-            <div key={f.id} className={styles.fileRow}>
-              <span className={styles.fileName} title={f.name}>{f.name}</span>
-              <span className={styles.fileRowCount}>{f.rows} rows</span>
-              <button
-                onClick={() => onRemoveFile(f.id)}
-                title="Remove this CSV"
-                className={styles.removeBtn}
-              >✕</button>
-            </div>
-          ))}
-        </div>
+        {file && (
+          <div className={styles.fileRow}>
+            <span className={styles.fileName} title={file.name}>{file.name}</span>
+            <span className={styles.fileRowCount}>{file.rows} rows</span>
+            <button onClick={onRemoveFile} title="Remove CSV" className={styles.removeBtn}>✕</button>
+          </div>
+        )}
       </div>
     </header>
   );

@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo, useRef } from "react";
+import React, { useState, useCallback, useMemo, useRef, useEffect } from "react";
 import html2canvas from "html2canvas";
 import { DEPTH_ORDER } from "./constants";
 import { parseCSV, parseFilename } from "./utils";
@@ -29,7 +29,7 @@ export default function Dashboard() {
   };
 
   const prevDepthsRef = useRef(new Set(DEPTH_ORDER));
-  useMemo(() => {
+  useEffect(() => {
     const newOnes = allDepths.filter(d => !prevDepthsRef.current.has(d));
     if (newOnes.length) {
       setEnabledDepths(prev => { const next = new Set(prev); newOnes.forEach(d => next.add(d)); return next; });
@@ -44,21 +44,22 @@ export default function Dashboard() {
   const handleDrop = useCallback(async (e) => {
     e.preventDefault();
     setDragOver(false);
-    const dropped = [...e.dataTransfer.files].filter(f => f.name.endsWith(".csv"));
-    for (const f of dropped) {
-      const text = await f.text();
-      const parsed = parseCSV(text);
-      if (parsed.length) {
-        const id = `${f.name}-${Date.now()}`;
-        setAllData(prev => [...prev, ...parsed.map(r => ({ ...r, _fileId: id }))]);
-        setFiles(prev => [...prev, { id, name: f.name, rows: parsed.length, ...parseFilename(f.name) }]);
-      }
-    }
+    const csv = [...e.dataTransfer.files].find(f => f.name.endsWith(".csv"));
+    if (!csv) return;
+    const parsed = parseCSV(await csv.text());
+    if (!parsed.length) return;
+    const id = `${csv.name}-${Date.now()}`;
+    prevDepthsRef.current = new Set(DEPTH_ORDER);
+    setEnabledDepths(new Set(DEPTH_ORDER));
+    setAllData(parsed.map(r => ({ ...r, _fileId: id })));
+    setFiles([{ id, name: csv.name, rows: parsed.length, ...parseFilename(csv.name) }]);
   }, []);
 
-  const removeFile = useCallback((id) => {
-    setAllData(prev => prev.filter(r => r._fileId !== id));
-    setFiles(prev => prev.filter(f => f.id !== id));
+  const removeFile = useCallback(() => {
+    setAllData([]);
+    setFiles([]);
+    prevDepthsRef.current = new Set(DEPTH_ORDER);
+    setEnabledDepths(new Set(DEPTH_ORDER));
   }, []);
 
   const [chartWidth, setChartWidth] = useState(708);
@@ -77,6 +78,12 @@ export default function Dashboard() {
 
   const chartRef = useRef(null);
   const [saving, setSaving] = useState(false);
+  const filesRef = useRef(files);
+  const selectedOpRef = useRef(selectedOp);
+  const tpsModeRef = useRef(tpsMode);
+  useEffect(() => { filesRef.current = files; }, [files]);
+  useEffect(() => { selectedOpRef.current = selectedOp; }, [selectedOp]);
+  useEffect(() => { tpsModeRef.current = tpsMode; }, [tpsMode]);
 
   const saveChart = useCallback(async () => {
     if (!chartRef.current || saving) return;
@@ -85,24 +92,32 @@ export default function Dashboard() {
       const canvas = await html2canvas(chartRef.current, {
         backgroundColor: "#ffffff", scale: 2, useCORS: true, logging: false,
       });
+      const f = filesRef.current;
+      const op = selectedOpRef.current;
+      const mode = tpsModeRef.current;
       const link = document.createElement("a");
-      const opSlug = selectedOp.replace(/[^a-z0-9_]/gi, "-");
-      const modelSlug = files.length === 1 && files[0].model ? files[0].model : "model";
-      const tpSlug = files.length === 1 && files[0].tp ? `tp${files[0].tp}` : "";
+      const opSlug = op.replace(/[^a-z0-9_]/gi, "-");
+      const modelSlug = f.length === 1 && f[0].model ? f[0].model : "model";
+      const tpSlug = f.length === 1 && f[0].tp ? `tp${f[0].tp}` : "";
       const prefix = [tpSlug, modelSlug].filter(Boolean).join("-");
-      const tpsModeSlug = selectedOp !== "ttft_pp" && selectedOp !== "ttft_ctx" ? `_${tpsMode === "per_req" ? "per-request" : "aggregate"}` : "";
+      const tpsModeSlug = op !== "ttft_pp" && op !== "ttft_ctx" ? `_${mode === "per_req" ? "per-request" : "aggregate"}` : "";
       link.download = `${prefix}_${opSlug}${tpsModeSlug}.png`;
       link.href = canvas.toDataURL("image/png");
       link.click();
     } finally {
       setSaving(false);
     }
-  }, [saving, selectedOp, files, tpsMode]);
+  }, [saving]);
 
   const tpsMetric = tpsMode === "per_req" ? "tps_req" : "tps";
   const tpsLabel = tpsMode === "per_req" ? "Tokens/s (per request)" : "Tokens/s (aggregate)";
 
   const filteredData = useMemo(() => allData.filter(d => enabledDepths.has(d.depth)), [allData, enabledDepths]);
+
+  const handleDragOver = useCallback((e) => { e.preventDefault(); setDragOver(true); }, []);
+  const handleDragLeave = useCallback(() => setDragOver(false), []);
+  const handleLogoDragOver = useCallback((e) => { e.preventDefault(); setLogoDragOver(true); }, []);
+  const handleLogoDragLeave = useCallback(() => setLogoDragOver(false), []);
 
   return (
     <div className={styles.root}>
@@ -110,8 +125,8 @@ export default function Dashboard() {
         files={files}
         dragOver={dragOver}
         onDrop={handleDrop}
-        onDragOver={e => { e.preventDefault(); setDragOver(true); }}
-        onDragLeave={() => setDragOver(false)}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
         onRemoveFile={removeFile}
       />
 
@@ -123,8 +138,8 @@ export default function Dashboard() {
         logoSrc={logoSrc} setLogoSrc={setLogoSrc}
         logoDragOver={logoDragOver}
         onLogoDrop={handleLogoDrop}
-        onLogoDragOver={e => { e.preventDefault(); setLogoDragOver(true); }}
-        onLogoDragLeave={() => setLogoDragOver(false)}
+        onLogoDragOver={handleLogoDragOver}
+        onLogoDragLeave={handleLogoDragLeave}
         saving={saving} onSaveChart={saveChart}
       />
 

@@ -43,10 +43,16 @@
   font-family: 'IBM Plex Mono';
 }
 
-.subtitleMulti {
-  font-size: 17px;
-  color: #57606a;
-  margin-top: 2px;
+
+.emptyState {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  color: #8c959f;
+  font-size: 16px;
+  border: 1px dashed #d0d7de;
+  border-radius: 10px;
 }
 
 .logoOverlay {

@@ -23,14 +23,8 @@
   color: #1a1f24;
 }
 
-.fileTagList {
-  margin-top: 8px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
 .fileTagRow {
+  margin-top: 8px;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -96,13 +90,6 @@
 
 .dropZone.over .dropZoneText {
   color: #0969da;
-}
-
-.fileList {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  width: 100%;
 }
 
 .fileRow {

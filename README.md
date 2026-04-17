@@ -1,6 +1,6 @@
 # Sparkrun · Benchmark Explorer
 
-A browser-based dashboard for visualizing and comparing AI inference benchmark results. Load one or more CSV files, explore throughput and latency across concurrency levels and context depths, and export charts as PNGs.
+A browser-based dashboard for visualizing AI inference benchmark results. Load a CSV file, explore throughput and latency across concurrency levels and context depths, and export charts as PNGs.
 
 ## Getting started
 
@@ -21,7 +21,7 @@ Open [http://localhost:5173](http://localhost:5173). No environment variables or
 
 ## Loading data
 
-Drag and drop one or more benchmark CSV files onto the header drop zone. You can load multiple files at once to compare runs side-by-side.
+Drag and drop a benchmark CSV file onto the header drop zone. Dropping a new file replaces the current one — only one file is active at a time.
 
 ### Expected CSV format
 
