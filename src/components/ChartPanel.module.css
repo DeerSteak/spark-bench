@@ -1,0 +1,61 @@
+.container {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+  position: relative;
+  /* width/min-width/max-width set inline — dynamic chartWidth value */
+}
+
+.chartHeader {
+  margin-bottom: 16px;
+}
+
+.chartTitle {
+  font-size: 19px;
+  font-weight: 600;
+  color: #1a1f24;
+  font-family: 'IBM Plex Sans';
+}
+
+.subtitleSingle {
+  margin-top: 4px;
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.subtitleModel {
+  font-size: 17px;
+  color: #79c0ff;
+  font-family: 'IBM Plex Mono';
+}
+
+.subtitleTp1 {
+  font-size: 17px;
+  color: #1a7f37;
+  font-family: 'IBM Plex Mono';
+}
+
+.subtitleTp2plus {
+  font-size: 17px;
+  color: #6e40c9;
+  font-family: 'IBM Plex Mono';
+}
+
+.subtitleMulti {
+  font-size: 17px;
+  color: #57606a;
+  margin-top: 2px;
+}
+
+.logoOverlay {
+  position: absolute;
+  bottom: 16px;
+  right: 16px;
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  pointer-events: none;
+  opacity: 1.0;
+}

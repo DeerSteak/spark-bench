@@ -3,12 +3,29 @@ import { C, CONCURRENCIES } from "../constants";
 import { buildLines, fmt } from "../utils";
 import CustomLegend from "./CustomLegend";
 import CustomTooltip from "./CustomTooltip";
+import styles from "./ChartPanel.module.css";
+
+function FileSubtitle({ files }) {
+  if (files.length === 1) {
+    return (
+      <div className={styles.subtitleSingle}>
+        <span className={styles.subtitleModel}>{files[0].model}</span>
+        {files[0].tpLabel && (
+          <span className={files[0].tp === 1 ? styles.subtitleTp1 : styles.subtitleTp2plus}>
+            · {files[0].tpLabel}
+          </span>
+        )}
+      </div>
+    );
+  }
+  return <div className={styles.subtitleMulti}>by context depth · lines = concurrency</div>;
+}
 
 function ChartCard({ title, subtitle, data, activeLines, yTickFormatter, yLabel, unit }) {
   return (
     <div className="card">
-      <div style={{ marginBottom: 16 }}>
-        <div style={{ fontSize: 19, fontWeight: 600, color: "#1a1f24", fontFamily: "'IBM Plex Sans'" }}>{title}</div>
+      <div className={styles.chartHeader}>
+        <div className={styles.chartTitle}>{title}</div>
         {subtitle}
       </div>
       <ResponsiveContainer width="100%" height={300}>
@@ -29,20 +46,9 @@ function ChartCard({ title, subtitle, data, activeLines, yTickFormatter, yLabel,
   );
 }
 
-function FileSubtitle({ files }) {
-  if (files.length === 1) {
-    return (
-      <div style={{ marginTop: 4, display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap" }}>
-        <span style={{ fontSize: 17, color: "#79c0ff", fontFamily: "'IBM Plex Mono'" }}>{files[0].model}</span>
-        {files[0].tpLabel && <span style={{ fontSize: 17, color: files[0].tp === 1 ? "#1a7f37" : "#6e40c9", fontFamily: "'IBM Plex Mono'" }}>· {files[0].tpLabel}</span>}
-      </div>
-    );
-  }
-  return <div style={{ fontSize: 17, color: "#57606a", marginTop: 2 }}>by context depth · lines = concurrency</div>;
-}
-
 export default function ChartPanel({ containerRef, selectedOp, filteredData, files, tpsLabel, tpsMetric, chartWidth, logoSrc }) {
   const isTTFT = selectedOp === "ttft_pp" || selectedOp === "ttft_ctx";
+  const containerStyle = { width: chartWidth, minWidth: chartWidth, maxWidth: chartWidth };
 
   if (isTTFT) {
     const ttftOp = selectedOp === "ttft_pp" ? "pp2048" : "ctx_pp";
@@ -50,7 +56,7 @@ export default function ChartPanel({ containerRef, selectedOp, filteredData, fil
     const data = buildLines(filteredData, ttftOp, "ttft");
     const lines = CONCURRENCIES.filter(c => data.some(d => d[`c${c}`] != null));
     return (
-      <div ref={containerRef} style={{ display: "grid", gridTemplateColumns: "1fr", gap: 20, width: chartWidth, minWidth: chartWidth, maxWidth: chartWidth, position: "relative" }}>
+      <div ref={containerRef} className={styles.container} style={containerStyle}>
         <ChartCard
           title={ttftTitle}
           subtitle={<FileSubtitle files={files} />}
@@ -60,7 +66,7 @@ export default function ChartPanel({ containerRef, selectedOp, filteredData, fil
           yLabel="Time (TTFT)"
           unit="ms"
         />
-        {logoSrc && <LogoOverlay src={logoSrc} />}
+        {logoSrc && <img src={logoSrc} className={styles.logoOverlay} />}
       </div>
     );
   }
@@ -68,7 +74,7 @@ export default function ChartPanel({ containerRef, selectedOp, filteredData, fil
   const tpsData = buildLines(filteredData, selectedOp, tpsMetric);
   const activeLines = CONCURRENCIES.filter(c => tpsData.some(d => d[`c${c}`] != null));
   return (
-    <div ref={containerRef} style={{ display: "grid", gridTemplateColumns: "1fr", gap: 20, width: chartWidth, minWidth: chartWidth, maxWidth: chartWidth, position: "relative" }}>
+    <div ref={containerRef} className={styles.container} style={containerStyle}>
       <ChartCard
         title={tpsLabel}
         subtitle={<FileSubtitle files={files} />}
@@ -78,20 +84,7 @@ export default function ChartPanel({ containerRef, selectedOp, filteredData, fil
         yLabel="Tokens / sec"
         unit="tok/s"
       />
-      {logoSrc && <LogoOverlay src={logoSrc} />}
+      {logoSrc && <img src={logoSrc} className={styles.logoOverlay} />}
     </div>
-  );
-}
-
-function LogoOverlay({ src }) {
-  return (
-    <img
-      src={src}
-      style={{
-        position: "absolute", bottom: 16, right: 16,
-        width: 64, height: 64, objectFit: "contain",
-        pointerEvents: "none", opacity: 0.9
-      }}
-    />
   );
 }
