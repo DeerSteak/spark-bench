@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useMemo, useRef, useEffect } from "react";
 import html2canvas from "html2canvas";
-import { DEPTH_ORDER } from "./constants";
+import { DEPTH_ORDER, CONCURRENCIES } from "./constants";
 import { parseCSV, parseFilename } from "./utils";
 import Header from "./components/Header";
 import Controls from "./components/Controls";
@@ -19,11 +19,21 @@ export default function Dashboard() {
 
   const allDepths = useMemo(() => [...new Set(allData.map(d => d.depth))].sort((a, b) => a - b), [allData]);
   const [enabledDepths, setEnabledDepths] = useState(new Set(DEPTH_ORDER));
+  const allConcurrencies = useMemo(() => [...new Set(allData.map(d => d.concurrency))].sort((a, b) => a - b), [allData]);
+  const [enabledConcurrencies, setEnabledConcurrencies] = useState(new Set(CONCURRENCIES));
 
   const toggleDepth = (depth) => {
     setEnabledDepths(prev => {
       const next = new Set(prev);
       next.has(depth) ? next.delete(depth) : next.add(depth);
+      return next;
+    });
+  };
+
+  const toggleConcurrency = (c) => {
+    setEnabledConcurrencies(prev => {
+      const next = new Set(prev);
+      next.has(c) ? next.delete(c) : next.add(c);
       return next;
     });
   };
@@ -49,17 +59,28 @@ export default function Dashboard() {
     const parsed = parseCSV(await csv.text());
     if (!parsed.length) return;
     const id = `${csv.name}-${Date.now()}`;
-    prevDepthsRef.current = new Set(DEPTH_ORDER);
-    setEnabledDepths(new Set(DEPTH_ORDER));
-    setAllData(parsed.map(r => ({ ...r, _fileId: id })));
-    setFiles([{ id, name: csv.name, rows: parsed.length, ...parseFilename(csv.name) }]);
+    const fileEntry = { id, name: csv.name, rows: parsed.length, ...parseFilename(csv.name) };
+    const newRows = parsed.map(r => ({ ...r, _fileId: id }));
+
+    if (filesRef.current.length === 1) {
+      setAllData(prev => [...prev, ...newRows]);
+      setFiles(prev => [...prev, fileEntry]);
+    } else {
+      prevDepthsRef.current = new Set(DEPTH_ORDER);
+      setEnabledDepths(new Set(DEPTH_ORDER));
+      setAllData(newRows);
+      setFiles([fileEntry]);
+    }
   }, []);
 
-  const removeFile = useCallback(() => {
-    setAllData([]);
-    setFiles([]);
-    prevDepthsRef.current = new Set(DEPTH_ORDER);
-    setEnabledDepths(new Set(DEPTH_ORDER));
+  const removeFile = useCallback((fileId) => {
+    const remaining = filesRef.current.filter(f => f.id !== fileId);
+    if (remaining.length === 0) {
+      prevDepthsRef.current = new Set(DEPTH_ORDER);
+      setEnabledDepths(new Set(DEPTH_ORDER));
+    }
+    setFiles(remaining);
+    setAllData(prev => prev.filter(d => d._fileId !== fileId));
   }, []);
 
   const [chartWidth, setChartWidth] = useState(708);
@@ -97,7 +118,9 @@ export default function Dashboard() {
       const mode = tpsModeRef.current;
       const link = document.createElement("a");
       const opSlug = op.replace(/[^a-z0-9_]/gi, "-");
-      const modelSlug = f.length === 1 && f[0].model ? f[0].model : "model";
+      const modelSlug = f.length === 2
+        ? `${f[0].model ?? "a"}_vs_${f[1].model ?? "b"}`
+        : (f.length === 1 && f[0].model ? f[0].model : "model");
       const tpSlug = f.length === 1 && f[0].tp ? `tp${f[0].tp}` : "";
       const prefix = [tpSlug, modelSlug].filter(Boolean).join("-");
       const tpsModeSlug = op !== "ttft_pp" && op !== "ttft_ctx" ? `_${mode === "per_req" ? "per-request" : "aggregate"}` : "";
@@ -112,7 +135,10 @@ export default function Dashboard() {
   const tpsMetric = tpsMode === "per_req" ? "tps_req" : "tps";
   const tpsLabel = tpsMode === "per_req" ? "Tokens/s (per request)" : "Tokens/s (aggregate)";
 
-  const filteredData = useMemo(() => allData.filter(d => enabledDepths.has(d.depth)), [allData, enabledDepths]);
+  const filteredData = useMemo(
+    () => allData.filter(d => enabledDepths.has(d.depth) && enabledConcurrencies.has(d.concurrency)),
+    [allData, enabledDepths, enabledConcurrencies]
+  );
 
   const handleDragOver = useCallback((e) => { e.preventDefault(); setDragOver(true); }, []);
   const handleDragLeave = useCallback(() => setDragOver(false), []);
@@ -134,6 +160,7 @@ export default function Dashboard() {
         selectedOp={selectedOp} setSelectedOp={setSelectedOp}
         tpsMode={tpsMode} setTpsMode={setTpsMode}
         allDepths={allDepths} enabledDepths={enabledDepths} onToggleDepth={toggleDepth}
+        allConcurrencies={allConcurrencies} enabledConcurrencies={enabledConcurrencies} onToggleConcurrency={toggleConcurrency}
         chartWidth={chartWidth} setChartWidth={setChartWidth}
         logoSrc={logoSrc} setLogoSrc={setLogoSrc}
         logoDragOver={logoDragOver}
@@ -159,6 +186,7 @@ export default function Dashboard() {
         selectedOp={selectedOp}
         sortConfig={sortConfig}
         onCycleSort={cycleSort}
+        files={files}
       />
 
       <div className={styles.ttftLegend}>

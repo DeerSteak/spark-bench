@@ -16,8 +16,9 @@ function ttftColor(v) {
   return "#3fb950";
 }
 
-export default function StatsTable({ filteredData, selectedOp, sortConfig, onCycleSort }) {
+export default function StatsTable({ filteredData, selectedOp, sortConfig, onCycleSort, files = [] }) {
   const tableOp = selectedOp === "ttft_pp" ? "pp2048" : selectedOp === "ttft_ctx" ? "ctx_pp" : selectedOp;
+  const isMultiFile = files.length > 1;
   const sorted = [...filteredData]
     .filter(d => d.op === tableOp)
     .sort((a, b) => {
@@ -32,6 +33,7 @@ export default function StatsTable({ filteredData, selectedOp, sortConfig, onCyc
       <table className={styles.table}>
         <thead>
           <tr>
+            {isMultiFile && <th className={styles.th}>Model</th>}
             {COLS.map(({ label, key }) => {
               const active = sortConfig.key === key;
               const arrow = active ? (sortConfig.dir === 1 ? " ↑" : " ↓") : " ↕";
@@ -44,17 +46,26 @@ export default function StatsTable({ filteredData, selectedOp, sortConfig, onCyc
           </tr>
         </thead>
         <tbody>
-          {sorted.map((d, i) => (
-            <tr key={i}>
-              <td className={`${styles.td} ${styles.tdDepth}`}>{DEPTHS_LABEL[d.depth] ?? d.depth}</td>
-              <td className={styles.td} style={{ color: C[`c${d.concurrency}`] }}>c{d.concurrency}</td>
-              <td className={`${styles.td} ${styles.tdTps}`}>{fmt(d.tps, null)}</td>
-              <td className={`${styles.td} ${styles.tdTpsReq}`}>{fmt(d.tps_req, null)}</td>
-              <td className={styles.td} style={{ color: d.ttft != null ? ttftColor(d.ttft) : undefined }}>
-                {d.ttft != null ? fmt(d.ttft, "ms") : "—"}
-              </td>
-            </tr>
-          ))}
+          {sorted.map((d, i) => {
+            const fileIdx = isMultiFile ? files.findIndex(f => f.id === d._fileId) : -1;
+            const fileColor = fileIdx === 0 ? "#0969da" : "#e36209";
+            return (
+              <tr key={i}>
+                {isMultiFile && (
+                  <td className={styles.td} style={{ color: fileColor, fontWeight: 700, fontFamily: "IBM Plex Mono" }}>
+                    {fileIdx === 0 ? "A" : "B"}
+                  </td>
+                )}
+                <td className={`${styles.td} ${styles.tdDepth}`}>{DEPTHS_LABEL[d.depth] ?? d.depth}</td>
+                <td className={styles.td} style={{ color: C[`c${d.concurrency}`] }}>c{d.concurrency}</td>
+                <td className={`${styles.td} ${styles.tdTps}`}>{fmt(d.tps, null)}</td>
+                <td className={`${styles.td} ${styles.tdTpsReq}`}>{fmt(d.tps_req, null)}</td>
+                <td className={styles.td} style={{ color: d.ttft != null ? ttftColor(d.ttft) : undefined }}>
+                  {d.ttft != null ? fmt(d.ttft, "ms") : "—"}
+                </td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>
