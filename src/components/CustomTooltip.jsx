@@ -8,7 +8,7 @@ export default function CustomTooltip({ active, payload, label, unit }) {
       <div className={styles.depthLabel}>depth: {label}</div>
       {payload.map(p => (
         <div key={p.dataKey} className={styles.row} style={{ color: p.color }}>
-          {p.dataKey}: <strong>{fmt(p.value, unit)}</strong>
+          {p.name}: <strong>{fmt(p.value, unit)}</strong>
         </div>
       ))}
     </div>

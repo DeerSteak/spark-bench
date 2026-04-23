@@ -1,10 +1,11 @@
-import { ALL_OPS, OP_LABELS, DEPTHS_LABEL } from "../constants";
+import { ALL_OPS, OP_LABELS, DEPTHS_LABEL, C } from "../constants";
 import styles from "./Controls.module.css";
 
 export default function Controls({
   selectedOp, setSelectedOp,
   tpsMode, setTpsMode,
   allDepths, enabledDepths, onToggleDepth,
+  allConcurrencies, enabledConcurrencies, onToggleConcurrency,
   chartWidth, setChartWidth,
   logoSrc, setLogoSrc,
   logoDragOver, onLogoDrop, onLogoDragOver, onLogoDragLeave,
@@ -45,6 +46,31 @@ export default function Controls({
               {DEPTHS_LABEL[d] ?? d}
             </label>
           ))}
+        </div>
+      </div>
+
+      <div className={styles.dividerGroup}>
+        <div className={styles.controlLabel}>Concurrency</div>
+        <div className={styles.depthFilters}>
+          {allConcurrencies.map(c => {
+            const enabled = enabledConcurrencies.has(c);
+            const color = C[`c${c}`];
+            return (
+              <label
+                key={c}
+                className={`${styles.depthCheck} ${enabled ? styles.enabled : styles.disabled}`}
+                style={enabled ? { color } : undefined}
+              >
+                <input
+                  type="checkbox"
+                  checked={enabled}
+                  onChange={() => onToggleConcurrency(c)}
+                  style={enabled ? { accentColor: color } : undefined}
+                />
+                c{c}
+              </label>
+            );
+          })}
         </div>
       </div>
 

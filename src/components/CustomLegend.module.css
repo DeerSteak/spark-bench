@@ -35,3 +35,28 @@
   border-radius: 2px;
   /* background color set inline — data-driven */
 }
+
+.fileSeparator {
+  width: 1px;
+  height: 24px;
+  background: #d0d7de;
+  margin: 0 4px;
+}
+
+.lineA {
+  display: inline-block;
+  width: 24px;
+  height: 0;
+  border-top: 2px solid #57606a;
+  margin-bottom: 2px;
+  vertical-align: middle;
+}
+
+.lineB {
+  display: inline-block;
+  width: 24px;
+  height: 0;
+  border-top: 2px dashed #57606a;
+  margin-bottom: 2px;
+  vertical-align: middle;
+}

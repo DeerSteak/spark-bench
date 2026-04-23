@@ -27,20 +27,54 @@
 
 .subtitleModel {
   font-size: 17px;
-  color: #79c0ff;
+  color: #1a1f24;
   font-family: 'IBM Plex Mono';
 }
 
 .subtitleTp1 {
   font-size: 17px;
-  color: #1a7f37;
+  color: #1a1f24;
   font-family: 'IBM Plex Mono';
 }
 
 .subtitleTp2plus {
   font-size: 17px;
-  color: #6e40c9;
+  color: #1a1f24;
   font-family: 'IBM Plex Mono';
+}
+
+.subtitleMulti {
+  margin-top: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.subtitleFile {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.subtitleLineA {
+  display: inline-block;
+  width: 24px;
+  height: 0;
+  border-top: 2px solid #57606a;
+  margin-bottom: 2px;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+
+.subtitleLineB {
+  display: inline-block;
+  width: 24px;
+  height: 0;
+  border-top: 2px dashed #57606a;
+  margin-bottom: 2px;
+  vertical-align: middle;
+  flex-shrink: 0;
 }
 
 

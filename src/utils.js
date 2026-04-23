@@ -61,3 +61,16 @@ export function buildLines(data, op, metric) {
   }
   return DEPTH_ORDER.filter(k => byDepth[k]).map(k => byDepth[k]);
 }
+
+export function buildLinesMulti(data, op, metric, fileIds) {
+  const byDepth = {};
+  for (const d of data) {
+    if (d.op !== op) continue;
+    const fi = fileIds.indexOf(d._fileId);
+    if (fi === -1) continue;
+    const key = d.depth;
+    if (!byDepth[key]) byDepth[key] = { depth: key, label: DEPTHS_LABEL[key] ?? `${key}` };
+    byDepth[key][`f${fi}_c${d.concurrency}`] = d[metric];
+  }
+  return DEPTH_ORDER.filter(k => byDepth[k]).map(k => byDepth[k]);
+}
