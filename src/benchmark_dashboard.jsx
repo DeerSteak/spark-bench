@@ -54,8 +54,29 @@ export default function Dashboard() {
   const handleDrop = useCallback(async (e) => {
     e.preventDefault();
     setDragOver(false);
-    const csv = [...e.dataTransfer.files].find(f => f.name.endsWith(".csv"));
-    if (!csv) return;
+    const csvFiles = [...e.dataTransfer.files].filter(f => f.name.endsWith(".csv")).slice(0, 2);
+    if (!csvFiles.length) return;
+
+    if (csvFiles.length === 2) {
+      const now = Date.now();
+      const entries = await Promise.all(csvFiles.map(async (csv, i) => {
+        const parsed = parseCSV(await csv.text());
+        if (!parsed.length) return null;
+        const id = `${csv.name}-${now}-${i}`;
+        const fileEntry = { id, name: csv.name, rows: parsed.length, ...parseFilename(csv.name) };
+        const rows = parsed.map(r => ({ ...r, _fileId: id }));
+        return { fileEntry, rows };
+      }));
+      const valid = entries.filter(Boolean);
+      if (!valid.length) return;
+      prevDepthsRef.current = new Set(DEPTH_ORDER);
+      setEnabledDepths(new Set(DEPTH_ORDER));
+      setAllData(valid.flatMap(entry => entry.rows));
+      setFiles(valid.map(entry => entry.fileEntry));
+      return;
+    }
+
+    const csv = csvFiles[0];
     const parsed = parseCSV(await csv.text());
     if (!parsed.length) return;
     const id = `${csv.name}-${Date.now()}`;
