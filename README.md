@@ -21,7 +21,7 @@ Open [http://localhost:5173](http://localhost:5173). No environment variables or
 
 ## Loading data
 
-Drag and drop a benchmark CSV file onto the header drop zone. Dropping a new file replaces the current one — only one file is active at a time.
+Drag and drop benchmark CSV files onto the header drop zone. You can load up to two files at once for side-by-side comparison — the second file's lines appear dashed. Dropping a third file replaces the oldest one.
 
 ### Expected CSV format
 
@@ -52,7 +52,7 @@ Files named with this pattern get richer labels:
 benchmark_{model}_{suite}_{tp}.csv
 ```
 
-Example: `benchmark_llama3_spark-arena-v1_tp8.csv` → shows "llama3 · TP8 · 8 nodes (QSFP)"
+Example: `benchmark_llama3_spark-arena-v1_tp8.csv` → shows "llama3 · 8 nodes (QSFP)"
 
 Files that don't match the pattern still work — the filename (minus `.csv`) is used as the label.
 
