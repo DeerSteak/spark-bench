@@ -21,7 +21,14 @@ Open [http://localhost:5173](http://localhost:5173). No environment variables or
 
 ## Loading data
 
-Drag and drop benchmark CSV files onto the header drop zone. You can load up to two files at once for side-by-side comparison — the second file's lines appear dashed. Dropping a third file replaces the oldest one.
+Drag and drop benchmark CSV files onto the header drop zone. You can load up to two files for side-by-side comparison — the second file's lines appear dashed.
+
+| Files already loaded | What you drop | Result |
+|---|---|---|
+| 0 | 1 file | Loads that file |
+| 1 | 1 file | Adds it as B for comparison |
+| 2 | 1 file | Replaces both; starts fresh with the new file |
+| any | 2 files at once | Replaces everything and loads both as A and B |
 
 ### Expected CSV format
 
