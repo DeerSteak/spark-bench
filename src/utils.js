@@ -36,7 +36,7 @@ export function parseFilename(name) {
     model: m[1],
     suite: m[2],
     tp,
-    tpLabel: tp === 1 ? "TP1 · single node" : `TP${tp} · ${tp} nodes (QSFP)`,
+    tpLabel: tp === 1 ? "single node" : `${tp} nodes (QSFP)`,
   };
 }
 
